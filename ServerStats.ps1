@@ -1,5 +1,6 @@
+#Create new file
 $FilePath = "Sample.txt"
-"Server info" | Out-File -FilePath $FilePath
+Out-File -FilePath $FilePath
 
 #HDD
 $RemainingStorage = [Math]::Round((Get-Volume -DriveLetter 'C').SizeRemaining/1GB)
