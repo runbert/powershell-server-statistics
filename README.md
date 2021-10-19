@@ -19,6 +19,8 @@ The script is currently writing the following properties to file:
 See [Sample.txt](https://github.com/runbert/Powershell-ServerStats/blob/master/Sample.txt) for expected output.
 
 ## Other
-Set execution policy to unrestricted using 'Set-ExecutionPolicy Unrestricted' to be able to run script from Powershell.\
-Run using '.\ServerStats.ps1'
-
+Set execution policy to unrestricted using ```Set-ExecutionPolicy Unrestricted``` to be able to run script from Powershell.\
+Run using ```.\ServerStats.ps1```
+\
+\
+Tested ok @ Windows 10.0.19042.
