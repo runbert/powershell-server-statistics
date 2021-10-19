@@ -33,7 +33,7 @@ Add-Content $FilePath "IP Address: $($IPAddress) (Wi-Fi)"
 #Since laptops can have multiple batteries installed, we get remaining percentage for all of them.
 $Batteries = (Get-WmiObject win32_battery);
 $BatteriesPercentage;
-Foreach ($battery in (Get-WmiObject win32_battery))
+Foreach ($battery in $Batteries)
 {
 
  $BatCharge = $battery.EstimatedChargeRemaining
