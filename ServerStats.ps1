@@ -12,24 +12,39 @@ $TotalMem = (Get-WmiObject -Class win32_physicalmemory -Property Capacity | Meas
 $FreeMem = [Math]::Round((Get-CIMInstance Win32_OperatingSystem | Select FreePhysicalMemory | Measure-Object -Property FreePhysicalMemory -Sum | Select-Object -ExpandProperty Sum) / 1Kb)
 Add-Content $FilePath "Free MEM: $($FreeMem)MB / $($TotalMem)MB"
 
-#CPU Usage in percentage
+#CPU Name
 $CPUName = (Get-WmiObject Win32_Processor).Name
+Add-Content $FilePath "CPU Name: $($CPUName)"
+
+#CPU Usage in percentage
 $CPUUsage = (Get-WmiObject Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
-Add-Content $FilePath "CPU Usage: $($CPUUsage)%"
+Add-Content $FilePath "    Usage: $($CPUUsage)%"
 
 #CPU Temperature
 $CPUTempKelvin = (Get-WMIObject -Query "SELECT * FROM Win32_PerfFormattedData_Counters_ThermalZoneInformation" -Namespace "root/CIMV2").Temperature
 $CPUTempCelsius = $CPUTempKelvin - 273.15
-Add-Content $FilePath "CPU Temp: $($CPUTempCelsius) C"
+Add-Content $FilePath "    Temp: $($CPUTempCelsius) C"
 
 #IPAddress Wi-Fi
 $IPAddress = (Get-NetIPAddress -AddressFamily IPV4 -InterfaceAlias Wi-Fi).IPAddress
-Add-Content $FilePath "IP Address: $($IPAddress)"
+Add-Content $FilePath "IP Address: $($IPAddress) (Wi-Fi)"
 
-#Battery
-$Battery1 = (Get-WmiObject win32_battery)[0].EstimatedChargeRemaining
-$Battery2 = (Get-WmiObject win32_battery)[1].EstimatedChargeRemaining
-Add-Content $FilePath "Remaining battery: $($Battery1)%, $($Battery2)%"
+#Battery Percentage
+#Since laptops can have multiple batteries installed, we get remaining percentage for all of them.
+$Batteries = (Get-WmiObject win32_battery);
+$BatteriesPercentage;
+Foreach ($battery in (Get-WmiObject win32_battery))
+{
+
+ $BatCharge = $battery.EstimatedChargeRemaining
+ $BatteriesPercentage += "$BatCharge %"
+
+  if($battery -Ne ($Batteries | Select-Object -Last 1)) {
+  	$BatteriesPercentage += ", ";
+  }
+
+}
+Add-Content $FilePath "Remaining battery: $($BatteriesPercentage)"
 
 #Uptime
 $UptDays = ((Get-Date) - (gcim Win32_OperatingSystem).LastBootUpTime).Days
@@ -47,6 +62,7 @@ $ScreenManufacturer = (Get-WmiObject -Class Win32_DesktopMonitor).MonitorManufac
 $ScreenName = (Get-WmiObject -Class Win32_DesktopMonitor).Name
 Add-Content $FilePath "Screen: $($ScreenManufacturer) $($ScreenName)"
 
+#Graphics
 $GraphDesc = (Get-WmiObject -Class Win32_VideoController).Description
 $GraphResHor =(Get-WmiObject -Class Win32_VideoController).CurrentHorizontalResolution;
 $GraphResVer = (Get-WmiObject -Class Win32_VideoController).CurrentVerticalResolution;
@@ -56,4 +72,5 @@ Add-Content $FilePath "Graphics: $($GraphDesc) @ $($GraphResHor)x$($GraphResVer)
 #Date
 $CurrentDate = Get-Date -DisplayHint Date
 Add-Content $FilePath "Latest update: $($CurrentDate)"
+
 Write-Host("Done! Server stats written to $($FilePath) @ $($CurrentDate)")
